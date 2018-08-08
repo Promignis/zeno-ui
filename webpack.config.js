@@ -9,7 +9,11 @@ const config = {
         filename: "bundle.js"
     },
     resolve: {
-        extensions: [ ".js", ".jsx" ]
+        extensions: [ ".js", ".jsx" ],
+        alias: {
+            "react": "preact-compat",
+            "react-dom": "preact-compat"
+        }
     },
     module: {
         rules: [
@@ -21,6 +25,10 @@ const config = {
             //         loader: "eslint-loader"
             //     }
             // },
+            {
+                test: /\.css/i,
+                use: [ "style-loader", "css-loader" ]
+            },
             {
                 test: /\.jsx?/i,
                 exclude: /node_modules/,

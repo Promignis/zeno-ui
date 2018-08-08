@@ -1,12 +1,14 @@
-import { h, Component } from 'preact';
+import { h, Component } from 'preact'
+import Editor from './components/editor/editor'
 
-export default class App extends Component {
+require ("./styles/base.css")
+
+class App extends Component {
   render() {
     return (
-      <div>
-        <h1>Hello worlds
-        </h1>
-      </div>
-    );
+      <Editor />
+    )
   }
 }
+
+export default App
