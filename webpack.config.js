@@ -41,7 +41,18 @@ const config = {
                         ]
                     }
                 }
-            }
+            },
+            {
+                test: /\.(png|jpg|gif)$/,
+                use: [
+                  {
+                    loader: 'file-loader',
+                    options: {
+                        limit: 8000
+                    }
+                  }
+                ]
+              }
         ]
     },
     plugins: [

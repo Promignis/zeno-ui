@@ -10,9 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "medium-editor": "^5.23.3",
-    "preact": "^8.3.0",
-    "react-medium-editor": "^1.8.1"
+    "codemirror": "^5.39.2",
+    "hypermd": "^0.3.10",
+    "preact": "^8.3.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
@@ -20,8 +20,10 @@
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.7.0",
     "css-loader": "^1.0.0",
+    "file-loader": "^1.1.11",
     "preact-compat": "^3.18.2",
     "style-loader": "^0.22.0",
+    "url-loader": "^1.0.1",
     "webpack": "^4.16.5",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.5"

@@ -16,16 +16,16 @@ html, body {
 }
 
 /* TODO Clean this up */
-div.medium-editor-element {
-    height: 100%;
-    padding: 20px;
-    padding-top: 0;
+div.CodeMirror {
+	height: 100%;
+	background: #FAFAFA;
+	padding: 20px;
 }
 
-div.medium-editor-element:focus {
-    outline: none;
+.CodeMirror pre {
+	line-height: 1.6em;
 }
 
-div.medium-editor-placeholder:after {
-    top: 20px;
+.CodeMirror-gutters {
+	display: none;
 }

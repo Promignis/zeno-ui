@@ -1,18 +1,34 @@
 import { h, Component } from 'preact'
-import Editor from 'react-medium-editor';
+import ReactDOM from 'react-dom'
+let codemirror = require('codemirror')
+let HyperMD = require('hypermd')
 
-require('medium-editor/dist/css/medium-editor.css');
-require('medium-editor/dist/css/themes/default.css');
+require('codemirror/lib/codemirror.css')
+require('codemirror/mode/markdown/markdown')
 
-class MEditor extends Component {
+class Editor extends Component {
+
+    constructor(props) {
+        super(props)
+        this.state = {
+            text: "some **value**"
+        }
+    }
+
+    componentDidMount() {
+        let opts = {
+            mode: 'markdown',
+            highlightFormatting: true,
+            fencedCodeBlobkFormatting: true
+        }
+        this.editor = HyperMD.fromTextArea(this.ref)
+        this.editor.setOption("lineNumbers", false)
+        // this.editor.on('change', () => this.props.onChange(this.editor.getValue()))
+    }
+
     render() {
         return (
-            <Editor
-                tag="pre"
-                text={this.state.text}
-                onChange={this.handleChange}
-                options={{toolbar: {buttons: ['bold', 'underline']}}}
-            />
+            <textArea ref={(self) => this.ref = self} class=".editable" autofocus></textArea>
         )
     }
 }
