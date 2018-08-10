@@ -30,6 +30,17 @@ const config = {
                 use: [ "style-loader", "css-loader" ]
             },
             {
+                test: /\.(png|jpg|gif|svg)$/,
+                use: [
+                  {
+                    loader: 'file-loader',
+                    options: {
+                        limit: 8000
+                    }
+                  }
+                ]
+            },
+            {
                 test: /\.jsx?/i,
                 exclude: /node_modules/,
                 use: {
@@ -41,18 +52,7 @@ const config = {
                         ]
                     }
                 }
-            },
-            {
-                test: /\.(png|jpg|gif)$/,
-                use: [
-                  {
-                    loader: 'file-loader',
-                    options: {
-                        limit: 8000
-                    }
-                  }
-                ]
-              }
+            }
         ]
     },
     plugins: [

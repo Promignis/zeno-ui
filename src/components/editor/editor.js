@@ -17,18 +17,19 @@ class Editor extends Component {
 
     componentDidMount() {
         let opts = {
-            mode: 'markdown',
-            highlightFormatting: true,
-            fencedCodeBlobkFormatting: true
+            mode: {
+                name: "hypermd",
+                hashtag: true,
+            }
         }
-        this.editor = HyperMD.fromTextArea(this.ref)
+        this.editor = HyperMD.fromTextArea(this.textArea, opts)
         this.editor.setOption("lineNumbers", false)
         // this.editor.on('change', () => this.props.onChange(this.editor.getValue()))
     }
 
     render() {
         return (
-            <textArea ref={(self) => this.ref = self} class=".editable" autofocus></textArea>
+            <textArea ref={(self) => this.textArea = self} class="editable" autofocus></textArea>
         )
     }
 }
