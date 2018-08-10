@@ -14,8 +14,8 @@ class App extends Component {
     //links/mentions just array of text for now, will store obj when required
     this.state = {
       firstKey: null,
-      links: ["test"],
-      mentions: ["test"]
+      links: ["test", "test2"],
+      mentions: ["test", "test2"]
     }
   }
 
