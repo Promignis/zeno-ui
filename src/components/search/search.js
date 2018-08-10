@@ -40,6 +40,10 @@ class Search extends Component {
     }
 
     handleClose(ev) {
+        this.setState({
+            value: "",
+            visible: false
+        })
         this.props.onClose(ev)
     }
 
