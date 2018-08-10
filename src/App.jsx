@@ -30,13 +30,17 @@ class App extends Component {
     }
   }
 
+  handleKeyup(event) {
+      this.state.firstChar = null
+  }
+
   toggleSearch() {
     this.search.toggleVisibility()
   }
 
   render() {
     return (
-      <div class="app" onKeyDown={this.handleKeydown.bind(this)} >
+      <div class="app" onKeyDown={this.handleKeydown.bind(this)} onKeyUp={this.handleKeyup.bind(this)} >
         <Search ref={(self) => this.search = self} onClose={(ev) => this.contentEditable.editor.focus()} />
         <Editor ref={(self) => this.contentEditable = self}/>
       </div>
