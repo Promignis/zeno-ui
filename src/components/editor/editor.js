@@ -9,6 +9,7 @@ require('codemirror/lib/codemirror.css')
 require('codemirror/addon/hint/show-hint'),
 require('codemirror/addon/hint/show-hint.css')
 
+// delimiters to capture for autocomplete
 let DELIM_HASHTAG = "#"
 let DELIM_MENTION = "@"
 
@@ -36,20 +37,26 @@ class Editor extends Component {
             showCursorWhenSelecting: true
         }
         this.editor = HyperMD.fromTextArea(this.textArea, opts)
+        window.codeEditor = this.editor //for testing
         this.editor.on('change', (ev, obj) => {
             this.props.onChange(this.editor.getValue())
         })
 
         this.editor.on("inputRead", (cm, change) => {
             if (change.text.length === 1 && (change.text[0] === DELIM_HASHTAG || change.text[0] === DELIM_MENTION)) {
-                console.log(change.text[0])
                 this.editor.showHint()
             }
         })
     }
 
     componentWillReceiveProps(newProps) {
-        this.editor.setOption("hintOptions", { "hint": createHintFunc({ links: newProps.links, mentions: newProps.mentions }) })
+        if (!this.editor) return
+        this.editor.setOption("hintOptions", { "hint": createHintFunc(newProps.links) })
+        if (newProps.text != this.state.text) {
+            console.log(newProps.text)
+            this.editor.getDoc().setValue(newProps.text)
+            this.setState({ text: newProps.text })
+        }
     }
 
     render() {
@@ -65,10 +72,10 @@ function createHintFunc(data) {
         const cursor = cm.getCursor(), line = cm.getLine(cursor.line)
         const start = cursor.ch - 1, end = cursor.ch
 
-        const char = line.slice(start, cursor.ch).toLowerCase()
-        const dataList = char === DELIM_HASHTAG ? data.links : data.mentions
+        const delimiter = line.slice(start, cursor.ch).toLowerCase()
+        const dataList = data.filter((item) => item.delimiter == delimiter).map((item) => delimiter + item.value)
         return {
-            list: dataList.map((word) => char + word),
+            list: dataList,
             from: codemirror.Pos(cursor.line, start),
             to: codemirror.Pos(cursor.line, end)
         }

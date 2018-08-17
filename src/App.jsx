@@ -7,15 +7,77 @@ require ("./styles/base.css")
 let KEYCODE_CTRL = 17
 let KEYCODE_SPACE = 32
 
+
+let DELIM_HASHTAG = "#"
+let DELIM_MENTION = "@"
+
 class App extends Component {
 
   constructor(props) {
     super(props)
-    //links/mentions just array of text for now, will store obj when required
+    // Note: { id, text, title, lastModified, lastCursorPosition: { row, column } }
+    // Notes: [ Note ]
+    // Link: { delimiter, value, instances:[ { noteId, row, column } ] }
+    // Links: [ Link ]
+    // currentNoteId: String
+    let initialNotes = [ 
+        {
+            id: "nt1",
+            text: "this is a test note\n#first",
+            title: "test1",
+            lastModified: Date.parse("01 Jan 2000 00:00:00 GMT"),
+            lastCursorPosition: {
+                row: 0,
+                column: 0
+            }
+        },
+        {
+            id: "nt2",
+            text: "this is another test note\n#second",
+            title: "",
+            lastModified: Date.parse("01 Jan 2000 00:00:01 GMT"),
+            lastCursorPosition: {
+                row: 0,
+                column: 0
+            }
+        }
+    ]
+
+    let initialLinks = [
+        {
+            delimiter: "#",
+            value: "first",
+            instances: [
+                {
+                    nodeId: "nt1",
+                    row: 1,
+                    column: 0
+                },
+                {
+                    nodeId: "nt2",
+                    row: 1,
+                    column: 0
+                },
+            ]
+        },
+        {
+            delimiter: "#",
+            value: "second",
+            instances: [
+                {
+                    nodeId: "nt2",
+                    row: 2,
+                    column: 0
+                }
+            ]
+        }
+    ]
+
     this.state = {
       firstKey: null,
-      links: ["test", "test2"],
-      mentions: ["test", "test2"]
+      notes: initialNotes,
+      links: initialLinks,
+      currentNoteId: "nt1"
     }
   }
 
@@ -35,23 +97,71 @@ class App extends Component {
       }
   }
 
-  //TODO cleanup
   handleChange(text) {
-      let linkMatches = text.match(/\s?#(\w+)\s/g) || []
-      let mentionsMatches = text.match(/\s?@(\w+)\s/g) || []
-      linkMatches = linkMatches.map((tag) => tag.trim().slice(1)).filter((link) => this.state.links.indexOf(link) == -1)
-      mentionsMatches = mentionsMatches.map((tag) => tag.trim().slice(1)).filter((link) => this.state.mentions.indexOf(link) == -1)
+      const allowedDelimiters = [ DELIM_HASHTAG, DELIM_MENTION ]
+      let linkMatches = []
+      allowedDelimiters.forEach((delimiter) => {
+          const regex = new RegExp('\\s?' + delimiter + "(\\w+)\\s", "gi")
+          let delimMatched = text.match(regex) || []
+          const matchedLinks = delimMatched.map((word) => {
+              return { 
+                  delimiter,
+                  value: word.trim().slice(1),
+                  instances: [ { noteId: this.state.currentNoteId } ]
+              }
+          })
+          linkMatches = linkMatches.concat(matchedLinks)
+      })
+      let newLinks = linkMatches.filter((link) => !this.state.links.find((currLink) => (currLink.delimiter == link.delimiter && currLink.value == link.value)))
+      let existingLinks = linkMatches.filter((link) => this.state.links.find((currLink) => (currLink.delimiter == link.delimiter && currLink.delimiter == link.value)))
+
       this.setState({
-          links: this.state.links.concat(linkMatches),
-          mentions: this.state.mentions.concat(mentionsMatches)
+          notes: this.state.notes.map((note, index) => index == this.state.currentNoteIndex ? text : note),
+          links: this.state.links.map((link) => {
+              const found = existingLinks.filter((currLink) => (currLink.delimiter == link.delimiter && currLink.delimiter == link.value))
+              const concatedInstances = found.reduce((pre, foundLink) => pre.concat(foundLink.instances), [])
+              link.instances = link.instances.concat(concatedInstances)
+              return link
+          }).concat(newLinks),
       })
   }
 
+  componentDidUpdate(newState) {
+      let logObj = {
+          links : this.state.links
+      }
+    //   console.warn(logObj)
+  }
+
+  addNote(id, text) {
+      this.setState({
+          notes: this.state.notes.concat({
+              id: id,
+              text: text,
+              title: "",
+              lastModified: Date.parse("01 Jan 2000 00:00:01 GMT"),
+              lastCursorPosition: {
+                  row: 0,
+                  column: 0
+              }
+          }),
+          currentNoteId: id
+      })
+  }
+
+  changeNote(id) {
+    _runtime.openFile((text) => {
+        console.log(text)
+        this.addNote(id, text)
+    })
+  }
+
   render() {
+    window.changeNote = this.changeNote.bind(this) //for testing zeno
     return (
       <div class="app" onKeyDown={this.handleKeydown.bind(this)} onKeyUp={this.handleKeyup.bind(this)} >
         <Search ref={(self) => this.search = self} onClose={(ev) => this.contentEditable.editor.focus()} />
-        <Editor ref={(self) => this.contentEditable = self} onChange={this.handleChange.bind(this)} links={this.state.links} mentions={this.state.mentions} />
+        <Editor ref={(self) => this.contentEditable = self} text={this.state.notes.find((note) => note.id == this.state.currentNoteId).text || ""} onChange={this.handleChange.bind(this)} links={this.state.links} />
       </div>
     )
   }
