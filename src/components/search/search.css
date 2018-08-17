@@ -1,7 +1,7 @@
 /* spotlight search bar css */
 #spotlight_wrapper {
-    position: absolute;
-    top: 15%;
+    position: fixed;
+    top: 20%;
     left: 0;
     right: 0;
     width: 100%;

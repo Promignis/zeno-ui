@@ -49,8 +49,19 @@ class Search extends Component {
 
     render() {
         return (
-            <div id="spotlight_wrapper" style={this.state.visible ? { "display": "block" } : { "display" : "none" } } >
-                <input type="text" id="spotlight" value={this.state.value} placeholder="Search" ref={(self) => this.searchbox = self} onChange={this.handleChange.bind(this)} onBlur={this.handleClose.bind(this)} />
+            <div
+                id="spotlight_wrapper"
+                style={this.state.visible ? { "display": "block" } : { "display" : "none" } }
+            >
+                <input
+                    type="text"
+                    id="spotlight"
+                    value={this.state.value}
+                    ref={(self) => this.searchbox = self}
+                    placeholder="Search"
+                    onChange={this.handleChange.bind(this)}
+                    onBlur={this.handleClose.bind(this)}
+                />
             </div>
         )
     }
