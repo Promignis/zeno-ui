@@ -1,13 +1,14 @@
 import { h, Component } from 'preact'
 import Editor from './components/editor/editor'
 import Search from './components/search/search'
+import "./styles/base.css"
 
-require ("./styles/base.css")
-
+// keycodes for opening search
 let KEYCODE_CTRL = 17
 let KEYCODE_SPACE = 32
 
 
+// delimiters to capture for autocomplete
 let DELIM_HASHTAG = "#"
 let DELIM_MENTION = "@"
 
@@ -92,9 +93,8 @@ class App extends Component {
   }
 
   handleKeyup(event) {
-      if (event.which === KEYCODE_CTRL) {
-          this.state.firstKey = null
-      }
+      if (event.which !== KEYCODE_CTRL) return
+      this.state.firstKey = null
   }
 
   handleChange(text) {
@@ -128,7 +128,7 @@ class App extends Component {
 
   componentDidUpdate(newState) {
       let logObj = {
-          links : this.state.links
+          links : newState.links
       }
     //   console.warn(logObj)
   }
@@ -150,14 +150,11 @@ class App extends Component {
   }
 
   changeNote(id) {
-    _runtime.openFile((text) => {
-        console.log(text)
-        this.addNote(id, text)
-    })
+    let text = "hello there\n#hello"
+    this.addNote(id, text)
   }
 
   render() {
-    window.changeNote = this.changeNote.bind(this) //for testing zeno
     return (
       <div class="app" onKeyDown={this.handleKeydown.bind(this)} onKeyUp={this.handleKeyup.bind(this)} >
         <Search ref={(self) => this.search = self} onClose={(ev) => this.contentEditable.editor.focus()} />

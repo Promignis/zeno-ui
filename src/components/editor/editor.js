@@ -1,13 +1,10 @@
 import { h, Component } from 'preact'
-import ReactDOM from 'react-dom'
-let codemirror = require('codemirror')
+
+let CodeMirror = require('codemirror')
 let HyperMD = require('hypermd')
-
-require('codemirror/lib/codemirror.css')
-
-//requires show hint addon for autocomplete
-require('codemirror/addon/hint/show-hint'),
-require('codemirror/addon/hint/show-hint.css')
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/addon/hint/show-hint'
+import 'codemirror/addon/hint/show-hint.css'
 
 // delimiters to capture for autocomplete
 let DELIM_HASHTAG = "#"
@@ -39,6 +36,8 @@ class Editor extends Component {
         this.editor = HyperMD.fromTextArea(this.textArea, opts)
         window.codeEditor = this.editor //for testing
         this.editor.on('change', (ev, obj) => {
+            const content = this.editor.getValue()
+            // this.setState({ text: content })
             this.props.onChange(this.editor.getValue())
         })
 
@@ -49,11 +48,11 @@ class Editor extends Component {
         })
     }
 
+    // TODO fix
     componentWillReceiveProps(newProps) {
         if (!this.editor) return
         this.editor.setOption("hintOptions", { "hint": createHintFunc(newProps.links) })
         if (newProps.text != this.state.text) {
-            console.log(newProps.text)
             this.editor.getDoc().setValue(newProps.text)
             this.setState({ text: newProps.text })
         }
@@ -66,18 +65,20 @@ class Editor extends Component {
     }
 }
 
-// TODO rewrite
 function createHintFunc(data) {
     return function (cm, options) {
-        const cursor = cm.getCursor(), line = cm.getLine(cursor.line)
-        const start = cursor.ch - 1, end = cursor.ch
-
-        const delimiter = line.slice(start, cursor.ch).toLowerCase()
-        const dataList = data.filter((item) => item.delimiter == delimiter).map((item) => delimiter + item.value)
+        const cursor = cm.getCursor(),
+            line = cm.getLine(cursor.line),
+            start = cursor.ch - 1,
+            end = cursor.ch,
+            delimiter = line.slice(start, cursor.ch).toLowerCase(),
+            dataList = data
+                .filter((item) => item.delimiter == delimiter)
+                .map((item) => delimiter + item.value)
         return {
             list: dataList,
-            from: codemirror.Pos(cursor.line, start),
-            to: codemirror.Pos(cursor.line, end)
+            from: CodeMirror.Pos(cursor.line, start),
+            to: CodeMirror.Pos(cursor.line, end)
         }
     }
 }
