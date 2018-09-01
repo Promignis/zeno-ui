@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack-dev-server --mode development --config webpack.config.js --progress --colors",
+    "flow": "flow",
+    "knack": "webpack --mode development --config webpack.config.js --progress --colors --output ../knack/js/zeno-bundle.js --watch",
     "compile": "webpack --mode production --config webpack.config.js --progress --colors",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -13,16 +15,22 @@
   "dependencies": {
     "codemirror": "^5.39.2",
     "hypermd": "^0.3.10",
-    "preact": "^8.3.0"
+    "preact": "^8.3.0",
+    "preact-compat": "^3.18.3",
+    "prop-types": "^15.6.2"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
-    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-plugin-module-resolver": "^3.1.1",
+    "babel-plugin-react-flow-props-to-prop-types": "^0.15.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.7.0",
+    "babel-preset-flow": "^6.23.0",
+    "babel-preset-react": "^6.24.1",
     "css-loader": "^1.0.0",
     "file-loader": "^1.1.11",
-    "preact-compat": "^3.18.2",
+    "flow-bin": "^0.79.1",
     "style-loader": "^0.22.0",
     "url-loader": "^1.0.1",
     "webpack": "^4.16.5",

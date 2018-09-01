@@ -12,7 +12,9 @@ const config = {
         extensions: [ ".js", ".jsx" ],
         alias: {
             "react": "preact-compat",
-            "react-dom": "preact-compat"
+            "react-dom": "preact-compat",
+            'create-react-class': 'preact-compat/lib/create-react-class',
+            'react-dom-factories': 'preact-compat/lib/react-dom-factories'
         }
     },
     module: {
@@ -46,9 +48,20 @@ const config = {
                 use: {
                     loader: "babel-loader",
                     options: {
-                        presets: [ "env" ],
+                        presets: [ "env" , "flow" ],
                         plugins: [
-                            ['transform-react-jsx', { pragma: 'h' }]
+                            [ "transform-react-jsx" ],
+                            ["module-resolver", {
+                                "root": ["."],
+                                "alias": {
+                                    "react": "preact-compat",
+                                    "react-dom": "preact-compat",
+                                    "create-react-class": "preact-compat/lib/create-react-class",
+                                    "react-dom-factories": "preact-compat/lib/react-dom-factories"
+                                }
+                            }],
+                            [ "react-flow-props-to-prop-types" ],
+                            [ "transform-class-properties" ],
                         ]
                     }
                 }

@@ -1,8 +1,8 @@
-import { h , Component } from 'preact'
+import React from 'react'
 
 require("./search.css")
 
-class Search extends Component {
+class Search extends React.Component {
 
     constructor(props) {
         super(props)

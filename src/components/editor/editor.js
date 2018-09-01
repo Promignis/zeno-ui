@@ -1,4 +1,5 @@
-import { h, Component } from 'preact'
+// @flow
+import React from 'react'
 
 let CodeMirror = require('codemirror')
 let HyperMD = require('hypermd')
@@ -6,11 +7,12 @@ import 'codemirror/lib/codemirror.css'
 import 'codemirror/addon/hint/show-hint'
 import 'codemirror/addon/hint/show-hint.css'
 
+
 // delimiters to capture for autocomplete
 let DELIM_HASHTAG = "#"
 let DELIM_MENTION = "@"
 
-class Editor extends Component {
+class Editor extends React.Component {
 
     constructor(props) {
         super(props)
