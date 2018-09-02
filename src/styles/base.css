@@ -35,4 +35,26 @@ div.CodeMirror {
 /* Move this to different files eventually */
 .app {
     height: 100%;
+    padding: 0;
+    display: flex;
+}
+
+.sidebar-container {
+    height: 100%;
+    display: flex;
+}
+
+.sidebar {
+    width: 150px;
+    background-color: aqua;
+    height: 100%;
+}
+
+.links {
+    background-color: aquamarine;
+}
+
+.editable {
+    height: 100%;
+    flex-grow: 1;
 }

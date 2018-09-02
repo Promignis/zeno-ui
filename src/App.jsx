@@ -1,6 +1,7 @@
 import { h, Component } from 'preact'
-import Editor from './components/editor/editor'
-import Search from './components/search/search'
+import Editor from 'Components/Editor'
+import Search from 'Components/Search'
+import Sidebar from 'Components/Sidebar'
 import "./styles/base.css"
 
 // keycodes for opening search
@@ -21,6 +22,10 @@ class App extends Component {
     // Link: { delimiter, value, instances:[ { noteId, row, column } ] }
     // Links: [ Link ]
     // currentNoteId: String
+    // currentLinkId: String
+    // userSettings: { 
+    //      theme: String
+    // }
     let initialNotes = [ 
         {
             id: "nt1",
@@ -50,12 +55,12 @@ class App extends Component {
             value: "first",
             instances: [
                 {
-                    nodeId: "nt1",
+                    noteId: "nt1",
                     row: 1,
                     column: 0
                 },
                 {
-                    nodeId: "nt2",
+                    noteId: "nt2",
                     row: 1,
                     column: 0
                 },
@@ -66,7 +71,7 @@ class App extends Component {
             value: "second",
             instances: [
                 {
-                    nodeId: "nt2",
+                    noteId: "nt2",
                     row: 2,
                     column: 0
                 }
@@ -74,11 +79,18 @@ class App extends Component {
         }
     ]
 
+    const userSettings = JSON.parse(localStorage.getItem("userSettings"))
+
     this.state = {
       firstKey: null,
       notes: initialNotes,
       links: initialLinks,
-      currentNoteId: "nt1"
+      currentNoteId: "nt1",
+      currentLinkId: "#first",
+      userSettings,
+      uiState: {
+          sidebar: true
+      }
     }
   }
 
@@ -126,13 +138,6 @@ class App extends Component {
       })
   }
 
-  componentDidUpdate(newState) {
-      let logObj = {
-          links : newState.links
-      }
-    //   console.warn(logObj)
-  }
-
   addNote(id, text) {
       this.setState({
           notes: this.state.notes.concat({
@@ -154,11 +159,56 @@ class App extends Component {
     this.addNote(id, text)
   }
 
+  onLinkChange(id) {
+      this.setState({
+          currentLinkId: id
+      })
+  }
+
   render() {
+    const list = this.state.links.map((item) => {
+        return {
+            text: item.delimiter + item.value
+        }
+    })
+    const currLinkInstances = this.state.links.find((item) => item.delimiter + item.value == this.state.currentLinkId).instances.map((item) => {
+        return {
+            text: item.noteId
+        }
+    })
+    const sidebarUI = () => {
+        if (!this.state.uiState.sidebar) return <div></div>;
+        return (
+            <div className="sidebar-container">
+                <Sidebar
+                    list={list}
+                    for="links"
+                    onItemChange={this.onLinkChange.bind(this)} />
+
+                <Sidebar
+                    list={currLinkInstances}
+                    for="instances" />
+            </div>
+        )
+    }
     return (
-      <div class="app" onKeyDown={this.handleKeydown.bind(this)} onKeyUp={this.handleKeyup.bind(this)} >
-        <Search ref={(self) => this.search = self} onClose={(ev) => this.contentEditable.editor.focus()} />
-        <Editor ref={(self) => this.contentEditable = self} text={this.state.notes.find((note) => note.id == this.state.currentNoteId).text || ""} onChange={this.handleChange.bind(this)} links={this.state.links} />
+      <div 
+        className={"app " + this.state.userSettings.theme + "-theme"}
+        onKeyDown={this.handleKeydown.bind(this)}
+        onKeyUp={this.handleKeyup.bind(this)} >
+
+        {sidebarUI()}
+
+        <Editor
+            ref={(self) => this.contentEditable = self}
+            text={this.state.notes.find((note) => note.id == this.state.currentNoteId).text || ""}
+            onChange={this.handleChange.bind(this)}
+            links={this.state.links} />
+
+        <Search
+            ref={(self) => this.search = self}
+            onClose={(ev) => this.contentEditable.editor.focus()} />
+
       </div>
     )
   }

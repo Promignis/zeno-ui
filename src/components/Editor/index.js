@@ -60,7 +60,9 @@ class Editor extends Component {
 
     render() {
         return (
-            <textArea ref={(self) => this.textArea = self} class="editable" autofocus></textArea>
+            <div className="editable">
+                <textArea ref={(self) => this.textArea = self} autofocus></textArea>
+            </div>
         )
     }
 }
