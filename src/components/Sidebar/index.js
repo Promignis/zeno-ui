@@ -4,12 +4,12 @@ class Sidebar extends Component {
 
     constructor(props) {
         super(props)
+        //list : Array listItem
+        //listItem : { text, children }
     }
 
     onItemSelected(val) {
-        if (this.props.onItemChange) {
-            this.props.onItemChange(val)
-        }
+        this.props.onItemChange(val)
     }
 
     render() {

@@ -26,7 +26,21 @@ class App extends Component {
     // userSettings: { 
     //      theme: String
     // }
-    let initialNotes = [ 
+    this.state = {
+      firstKey: null,
+      notes: this.getAllNotes(),
+      links: this.getAllLinks(),
+      currentNoteId: "nt1",
+      currentLinkId: "#first",
+      userSettings: this.getUserSettings(),
+      uiState: {
+          sidebar: true
+      }
+    }
+  }
+
+  getAllNotes() {
+    return [ 
         {
             id: "nt1",
             text: "this is a test note\n#first",
@@ -48,8 +62,10 @@ class App extends Component {
             }
         }
     ]
+  }
 
-    let initialLinks = [
+  getAllLinks() {
+    return [
         {
             delimiter: "#",
             value: "first",
@@ -78,20 +94,10 @@ class App extends Component {
             ]
         }
     ]
+  }
 
-    const userSettings = JSON.parse(localStorage.getItem("userSettings"))
-
-    this.state = {
-      firstKey: null,
-      notes: initialNotes,
-      links: initialLinks,
-      currentNoteId: "nt1",
-      currentLinkId: "#first",
-      userSettings,
-      uiState: {
-          sidebar: true
-      }
-    }
+  getUserSettings() {
+    return JSON.parse(localStorage.getItem("userSettings"))
   }
 
   handleKeydown(event) {
@@ -115,26 +121,54 @@ class App extends Component {
       allowedDelimiters.forEach((delimiter) => {
           const regex = new RegExp('\\s?' + delimiter + "(\\w+)\\s", "gi")
           let delimMatched = text.match(regex) || []
-          const matchedLinks = delimMatched.map((word) => {
-              return { 
-                  delimiter,
-                  value: word.trim().slice(1),
-                  instances: [ { noteId: this.state.currentNoteId } ]
+          let matchedLinks = []
+          delimMatched.forEach((word) => {
+              const linkExists = matchedLinks.find((link) =>
+                link.value == word
+              )
+              if (!linkExists) {
+                let newLink = { 
+                    delimiter,
+                    value: word.trim().slice(1),
+                    instances: [{ noteId: this.state.currentNoteId }]
+                };
+                linkMatches = linkMatches.concat(newLink)
+              } else {
+                linkMatches = linkMatches.concat(matchedLinks)
               }
           })
-          linkMatches = linkMatches.concat(matchedLinks)
       })
-      let newLinks = linkMatches.filter((link) => !this.state.links.find((currLink) => (currLink.delimiter == link.delimiter && currLink.value == link.value)))
-      let existingLinks = linkMatches.filter((link) => this.state.links.find((currLink) => (currLink.delimiter == link.delimiter && currLink.delimiter == link.value)))
-
+      let newLinks = linkMatches.filter((link) =>
+        !this.state.links.find((currLink) =>
+            (currLink.delimiter == link.delimiter &&
+                currLink.value == link.value)))
+      let existingLinks = linkMatches.filter((link) =>
+        this.state.links.find((currLink) =>
+            (currLink.delimiter == link.delimiter &&
+            currLink.value == link.value)))
+    
       this.setState({
-          notes: this.state.notes.map((note, index) => index == this.state.currentNoteIndex ? text : note),
+          notes: this.state.notes.map((note) =>
+            note.id == this.state.currentNodeId ? text : note),
           links: this.state.links.map((link) => {
-              const found = existingLinks.filter((currLink) => (currLink.delimiter == link.delimiter && currLink.delimiter == link.value))
-              const concatedInstances = found.reduce((pre, foundLink) => pre.concat(foundLink.instances), [])
-              link.instances = link.instances.concat(concatedInstances)
+              const found = existingLinks.find((currLink) =>
+                (currLink.delimiter == link.delimiter &&
+                    currLink.value == link.value))
+              if (!found) return link
+              let newInstances = []
+              console.log(found)
+              found.instances.forEach((inst) => {
+                  const foundInstance = link.instances.find((currInst) =>
+                    currInst.noteId === inst.noteId &&
+                    currInst.row === inst.row &&
+                    currInst.column === currInst.column
+                  )
+                  if (foundInstance) return
+                  newInstances = newInstances.concat(inst)
+              })
+              link.instances = link.instances.concat(newInstances)
               return link
-          }).concat(newLinks),
+          }).concat(newLinks)
       })
   }
 
@@ -165,6 +199,12 @@ class App extends Component {
       })
   }
 
+  onNoteChange(id) {
+      this.setState({
+          currentNoteId: id
+      })
+  }
+
   render() {
     const list = this.state.links.map((item) => {
         return {
@@ -187,7 +227,8 @@ class App extends Component {
 
                 <Sidebar
                     list={currLinkInstances}
-                    for="instances" />
+                    for="instances"
+                    onItemChange={this.onNoteChange.bind(this)} />
             </div>
         )
     }
@@ -201,7 +242,7 @@ class App extends Component {
 
         <Editor
             ref={(self) => this.contentEditable = self}
-            text={this.state.notes.find((note) => note.id == this.state.currentNoteId).text || ""}
+            text={this.state.notes.find((note) => note.id == this.state.currentNoteId).text}
             onChange={this.handleChange.bind(this)}
             links={this.state.links} />
 

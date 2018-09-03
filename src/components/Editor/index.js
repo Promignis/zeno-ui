@@ -35,10 +35,12 @@ class Editor extends Component {
         }
         this.editor = HyperMD.fromTextArea(this.textArea, opts)
         window.codeEditor = this.editor //for testing
-        this.editor.on('change', (ev, obj) => {
+        this.editor.on('change', (inst, obj) => {
+            console.log(obj)
+            if (!(obj.origin === "+input" || obj.origin === "complete")) return
             const content = this.editor.getValue()
             // this.setState({ text: content })
-            this.props.onChange(this.editor.getValue())
+            this.props.onChange(content)
         })
 
         this.editor.on("inputRead", (cm, change) => {
@@ -61,7 +63,9 @@ class Editor extends Component {
     render() {
         return (
             <div className="editable">
-                <textArea ref={(self) => this.textArea = self} autofocus></textArea>
+                <textArea ref={(self) => this.textArea = self} autofocus>
+                    {this.props.text}
+                </textArea>
             </div>
         )
     }
