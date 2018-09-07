@@ -1,6 +1,6 @@
 import { h , Component } from 'preact'
 
-require("./search.css")
+require("Components/search/search.css")
 
 class Search extends Component {
 

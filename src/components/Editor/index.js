@@ -5,6 +5,7 @@ let HyperMD = require('hypermd')
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/addon/hint/show-hint'
 import 'codemirror/addon/hint/show-hint.css'
+import './base.css'
 
 // delimiters to capture for autocomplete
 let DELIM_HASHTAG = "#"
@@ -28,6 +29,7 @@ class Editor extends Component {
             lineNumbers: false,
             lineSeparator: null,
             lineWrapping: true,
+            theme: "hypermd-light dark",
             extraKeys: {
                 "Shift-Space": "autocomplete"
             },

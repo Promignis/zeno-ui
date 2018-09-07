@@ -53,7 +53,7 @@ class App extends Component {
         },
         {
             id: "nt2",
-            text: "this is another test note\n#second",
+            text: "this is another test note\n#first\n#second",
             title: "",
             lastModified: Date.parse("01 Jan 2000 00:00:01 GMT"),
             lastCursorPosition: {

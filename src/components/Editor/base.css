@@ -1,0 +1,39 @@
+.editable .cm-s-hypermd-light {
+    font-size: 12pt;
+    font-weight: 500;
+    color: #66593A;
+    background: #FCF3E1;
+}
+
+.editable .cm-s-hypermd-light.cm-s-dark {
+    background: #203745;
+    color: #F2FAFF;
+}
+
+.editable .cm-s-hypermd-light.cm-s-dark .CodeMirror-cursor {
+    border-left: 3px solid #87D3FF;
+}
+
+.editable .cm-s-hypermd-light span.cm-hashtag {
+    background-color: transparent;
+    color: #17A185;
+    font-size: 1rem;
+}
+
+.editable .cm-s-hypermd-light.cm-s-dark span.cm-hashtag {
+    color: #87D3FF;
+}
+
+.editable .cm-s-hypermd-light span.cm-hashtag {
+    background-color: transparent;
+    color: #17A185;
+    font-size: 1rem;
+}
+
+.editable .cm-s-hypermd-light span.cm-hashtag.cm-hashtag-begin {
+    padding: 0;
+}
+
+.editable .cm-s-hypermd-light .cm-strong {
+    font-weight: 800;
+}
