@@ -13,7 +13,8 @@
   "dependencies": {
     "codemirror": "^5.39.2",
     "hypermd": "^0.3.10",
-    "preact": "^8.3.0"
+    "preact": "^8.3.0",
+    "ramda": "^0.25.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
