@@ -311,26 +311,20 @@ class App extends Component {
  /*
   * all transformers
   */
-function getNoteById(nId, notes) {
-  return R.find(R.propEq("id", nId), notes)
-}
+const getNoteById = (nId, notes) => R.find(R.propEq("id", nId), notes)
 
-function getLinksInNote(nId, notes) {
-  return R.prop("links", getNoteById(nId, notes))
-}
+const getLinksInNote = (nId, notes) => R.prop("links", getNoteById(nId, notes))
 
-function getTextForChar(key) {
-  return R.find(R.propEq("char")(key))(allowedLinks).text
-}
+const getTextForChar = key => R.find(R.propEq("char")(key))(allowedLinks).text
 
-function getUniqueLinksByCategory(notes) {
+const getUniqueLinksByCategory = notes => {
   const linkText = link => R.concat(link.char, link.value)
   const linkEq = (link1, link2) => R.equals(linkText(link1), linkText(link2))
-  const uniqObj = R.pipe(
-    R.map(R.prop("links")),
-    R.flatten,
+  const uniqObj = R.compose(
+    R.groupBy(R.prop("char")),
     R.uniqWith(linkEq),
-    R.groupBy(R.prop("char"))
+    R.flatten,
+    R.map(R.prop("links"))
   )(notes)
   const objToArr = key => {
     return { char: key, links: uniqObj[key], text: getTextForChar(key) }
@@ -342,7 +336,7 @@ const linkText = link => R.concat(link.char, link.value)
 
 const linkEq = (link1, link2) => R.equals(linkText(link1), linkText(link2))
 
-function getAllFlattenedLinks(notes) {
+const getAllFlattenedLinks = (notes) => {
   const linkNotes = note => {
     const notePosition = pos => { return { position: Object.assign({}, pos, { noteId: note.id }) } }
     return note.links.map(link => Object.assign({}, link, notePosition(link.position)))
@@ -357,45 +351,31 @@ function getAllFlattenedLinks(notes) {
     existingLink.occurences.push(cur.position)
     return acc
   }
-  const links = R.pipe(
-    R.map(linkNotes),
+  const links = R.compose(
+    R.reduce(linkOccurences, []),
     R.flatten,
-    R.reduce(linkOccurences, [])
+    R.map(linkNotes)
   )(notes)
   return links
 }
 
-function getLinkOccurrences(notes, lKey) {
+const getLinkOccurrences = (notes, lKey) => {
   const links = getAllFlattenedLinks(notes)
   const linkFound = links.find(link => (link.char + link.value) == lKey)
   return linkFound ? linkFound.occurences : []
 }
 
 
-function sidebarData(uniqueLinks) {
-  const categories = R.keys(uniqueLinks)
-  const transformItem = item => {
-    return {
-      text: item.char + item.value
-    }
-  }
-  const transform = category => {
-    return {
-      text: R.prop("text", R.find(R.propEq("char", category),  allowedLinks)),
-      char: category,
-      items: R.map(transformItem, uniqueLinks[category])
-    }
-  }
-  return R.map(transform)(categories)
-}
-
-function getStoreItem(key) {
+/*
+ * general helpers
+ */
+const getStoreItem = key => {
   if (Config.target == "browser") return JSON.parse(localStorage.getItem(key))
   // add knack storage api
   if (Config.target == "knack") return {}
 }
 
-function setStoreItem(key, val) {
+const setStoreItem = (key, val) => {
   if (Config.target == "browser") return localStorage.setItem(key, JSON.stringify(val)) || true
   // add knack storage api
   if (Config.target == "knack") return {}
