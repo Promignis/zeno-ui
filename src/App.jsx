@@ -1,7 +1,6 @@
 import { h, Component } from 'preact'
 import Editor from 'Components/Editor'
 import Search from 'Components/Search'
-import Sidebar from 'Components/Sidebar'
 import mockNotes from './MockNotes'
 import { default as Config } from '../app.config'
 import "./styles/base.css"
@@ -72,6 +71,7 @@ class App extends Component {
      */
 
     // set mock data for testing
+    setStoreItem("userSettings", { theme: "dark" })
     setStoreItem("appState", { notes: mockNotes })
 
     this.state = {
@@ -196,56 +196,108 @@ class App extends Component {
     this.addNote(id, text)
   }
 
-  onLinkChange(id) {
+  handleNoteChange(id) {
     this.setState({
-      currentLinkId: id
+      ui: Object.assign({}, this.state.ui, { currentNoteId: id })
     })
   }
 
-  onNoteChange(id) {
+  handleLinkChange(id) {
     this.setState({
-      currentNoteId: id
+      ui: Object.assign({},
+        this.state.ui,
+        {
+          currentLinkId: id,
+          currentNoteId: getLinkOccurrences(this.state.app.notes, id)[0].noteId
+        })
     })
+  }
+
+  /*
+   * functions for rendering
+   */
+  renderSidebarLink(link) {
+      return (
+        <li
+          className={"sidebar-link-category-list-item " + (this.state.ui.currentLinkId == linkText(link) ? "selected" : "")}
+          onClick={this.handleLinkChange.bind(this, linkText(link))}
+          >
+          {linkText(link)}
+        </li>
+      )
+    }
+
+  renderSidebarCategory (category) {
+    return (
+      <li
+        className={"sidebar-link-category sidebar-link-" + category.text.toLowerCase()}
+      >
+        <p className="sidebar-link-category-text">{category.text}</p>
+        <ul className="sidebar-link-category-list">
+          {R.map(this.renderSidebarLink.bind(this), category.links)}
+        </ul>
+      </li>
+    )
+  }
+
+  renderSidebarNote (linkOccurence) {
+    const note = getNoteById(linkOccurence.noteId, this.state.app.notes)
+    return (
+      <li
+        className={"sidebar-note-list-item " + (this.state.ui.currentNoteId == note.id ? "selected" : "")}
+        onClick={this.handleNoteChange.bind(this, note.id)}
+      >
+        <p className="sidebar-note-list-item-header">{note.id}</p>
+        <p className="sidebar-note-list-item-text">{note.text}</p>
+      </li>
+    )
   }
 
   render() {
-    const currentNoteLinks = R.pipe(
-      R.find(R.propEq("id", this.state.ui.currentNoteId)),
-      R.prop("links")
-    )(this.state.app.notes)
-
-    const sidebarUI = () => {
-      if (!this.state.ui.sidebar.visible) return <div></div>;
-      return (
+    const sidebarUI = (
         <div className="sidebar-container">
-          <Sidebar
-            data={sidebarData(getUniqueLinks(this.state.app.notes))}
-            for="links"
-            onItemChange={this.onLinkChange.bind(this)} />
-
-          <Sidebar
-            data={[]}
-            for="instances"
-            onItemChange={this.onNoteChange.bind(this)} />
+          <div className="sidebar">
+            <div className="sidebar-column sidebar-link">
+              <h2 className="sidebar-no-filter">All</h2>
+              <ul className="sidebar-link-list">
+                {
+                  R.compose(
+                    R.map(this.renderSidebarCategory.bind(this)),
+                    getUniqueLinksByCategory
+                  )(this.state.app.notes)
+                }
+              </ul>
+            </div>
+            <div className="sidebar-column sidebar-note">
+              <div className="sidebar-search"></div>
+              <ul className="sidebar-note-list">
+                {
+                  R.compose(
+                    R.map(this.renderSidebarNote.bind(this)),
+                    R.curry(getLinkOccurrences)(this.state.app.notes)
+                  )(this.state.ui.currentLinkId)
+                }
+              </ul>
+            </div>
+          </div>
         </div>
       )
-    }
-    console.log(getLinkOccurrences(this.state.app.notes, "#first"))
+
+    //console.log(getUniqueLinksByCategory(this.state.app.notes))
+    //console.log(getAllFlattenedLinks(this.state.app.notes))
+    //console.log(getLinkOccurrences(this.state.app.notes, "#first"))
     return (
-      <div 
+      <div
         className={"app " + this.state.userSettings.theme + "-theme"}
         onKeyDown={this.handleKeyDown.bind(this)}
         onKeyUp={this.handleKeyUp.bind(this)} >
-
-        {sidebarUI()}
-
+        {sidebarUI}
         <Editor
           ref={(self) => this.contentEditable = self}
           note={getNoteById(this.state.ui.currentNoteId, this.state.app.notes)}
           text={this.state.app.notes.find((note) => note.id == this.state.ui.currentNoteId).text}
           onLinkUpdate={this.updateNoteLinks.bind(this)}
-          links={getUniqueLinks(this.state.app.notes)} />
-
+          links={getUniqueLinksByCategory(this.state.app.notes)} />
         <Search
           ref={(self) => this.search = self}
           onClose={(ev) => this.contentEditable.editor.focus()} />
@@ -255,33 +307,70 @@ class App extends Component {
   }
 }
 
+
+ /*
+  * all transformers
+  */
 function getNoteById(nId, notes) {
   return R.find(R.propEq("id", nId), notes)
 }
- 
-function getUniqueLinks(notes) {
+
+function getLinksInNote(nId, notes) {
+  return R.prop("links", getNoteById(nId, notes))
+}
+
+function getTextForChar(key) {
+  return R.find(R.propEq("char")(key))(allowedLinks).text
+}
+
+function getUniqueLinksByCategory(notes) {
   const linkText = link => R.concat(link.char, link.value)
   const linkEq = (link1, link2) => R.equals(linkText(link1), linkText(link2))
-  return R.pipe(
+  const uniqObj = R.pipe(
     R.map(R.prop("links")),
     R.flatten,
     R.uniqWith(linkEq),
     R.groupBy(R.prop("char"))
   )(notes)
+  const objToArr = key => {
+    return { char: key, links: uniqObj[key], text: getTextForChar(key) }
+  }
+  return Object.keys(uniqObj).map(objToArr)
+}
+
+const linkText = link => R.concat(link.char, link.value)
+
+const linkEq = (link1, link2) => R.equals(linkText(link1), linkText(link2))
+
+function getAllFlattenedLinks(notes) {
+  const linkNotes = note => {
+    const notePosition = pos => { return { position: Object.assign({}, pos, { noteId: note.id }) } }
+    return note.links.map(link => Object.assign({}, link, notePosition(link.position)))
+  }
+  const linkOccurences = (acc, cur) => {
+    const existingLink = R.find(R.curry(linkEq)(cur))(acc)
+    if (!existingLink) {
+      const newObj = { char: cur.char, value: cur.value, occurences: [].concat(cur.position) }
+      return acc.concat(newObj)
+    }
+    existingLink.occurences = existingLink.occurences || []
+    existingLink.occurences.push(cur.position)
+    return acc
+  }
+  const links = R.pipe(
+    R.map(linkNotes),
+    R.flatten,
+    R.reduce(linkOccurences, [])
+  )(notes)
+  return links
 }
 
 function getLinkOccurrences(notes, lKey) {
-  const linkText = link => R.concat(link.char, link.value)
-  const linkEq = (link1, link2) => R.equals(linkText(link1), linkText(link2))
-  const linkTextEq = (text, link) => R.equals(text, linkText(link))
-  const ret = R.pipe(
-    R.map(R.prop("links")),
-    R.flatten,
-    R.uniqWith(linkEq),
-    R.filter(R.curry(linkTextEq)(lKey))
-  )(notes)
-  return ret
+  const links = getAllFlattenedLinks(notes)
+  const linkFound = links.find(link => (link.char + link.value) == lKey)
+  return linkFound ? linkFound.occurences : []
 }
+
 
 function sidebarData(uniqueLinks) {
   const categories = R.keys(uniqueLinks)
@@ -290,12 +379,12 @@ function sidebarData(uniqueLinks) {
       text: item.char + item.value
     }
   }
-  const transform = category => { 
-    return { 
+  const transform = category => {
+    return {
       text: R.prop("text", R.find(R.propEq("char", category),  allowedLinks)),
       char: category,
       items: R.map(transformItem, uniqueLinks[category])
-    } 
+    }
   }
   return R.map(transform)(categories)
 }
