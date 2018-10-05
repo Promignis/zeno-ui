@@ -5,7 +5,7 @@ import mockNotes from './MockNotes'
 import { default as Config } from '../app.config'
 import "./styles/base.css"
 
-var R = require('ramda')
+const R = require('ramda')
 
 // keycodes for opening search
 const KEYCODE_CTRL = 17
@@ -105,63 +105,6 @@ class App extends Component {
     this.state.firstKey = null
   }
 
-  handleChange(text) {
-    const allowedDelimiters = [ DELIM_HASHTAG, DELIM_MENTION ]
-    //let linkMatches = []
-    //allowedDelimiters.forEach((delimiter) => {
-      //const regex = new RegExp('\\s?' + delimiter + "(\\w+)\\s", "gi")
-      //let delimMatched = text.match(regex) || []
-      //let matchedLinks = []
-      //delimMatched.forEach((word) => {
-        //const linkExists = matchedLinks.find((link) =>
-          //link.value == word
-        //)
-        //if (!linkExists) {
-          //let newLink = {
-            //delimiter,
-            //value: word.trim().slice(1),
-            //instances: [{ noteId: this.state.currentNoteId }]
-          //};
-          //linkMatches = linkMatches.concat(newLink)
-        //} else {
-          //linkMatches = linkMatches.concat(matchedLinks)
-        //}
-      //})
-    //})
-    //let newLinks = linkMatches.filter((link) =>
-      //!this.state.links.find((currLink) =>
-        //(currLink.delimiter == link.delimiter &&
-          //currLink.value == link.value)))
-    //let existingLinks = linkMatches.filter((link) =>
-      //this.state.links.find((currLink) =>
-        //(currLink.delimiter == link.delimiter &&
-          //currLink.value == link.value)))
-
-    //this.setState({
-      //notes: this.state.notes.map((note) =>
-        //note.id == this.state.currentNodeId ? text : note),
-      //links: this.state.links.map((link) => {
-        //const found = existingLinks.find((currLink) =>
-          //(currLink.delimiter == link.delimiter &&
-            //currLink.value == link.value))
-        //if (!found) return link
-        //let newInstances = []
-        //console.log(found)
-        //found.instances.forEach((inst) => {
-          //const foundInstance = link.instances.find((currInst) =>
-            //currInst.noteId === inst.noteId &&
-            //currInst.row === inst.row &&
-            //currInst.column === currInst.column
-          //)
-          //if (foundInstance) return
-          //newInstances = newInstances.concat(inst)
-        //})
-        //link.instances = link.instances.concat(newInstances)
-        //return link
-      //}).concat(newLinks)
-    //})
-  }
-
   getNoteLinks(lNoteId) {
     const getNote = note => note.id == lNoteId
     const foundNote = this.state.app.notes.find(getNote)
@@ -169,10 +112,26 @@ class App extends Component {
     return foundNote.links.slice(0)
   }
 
+  setNoteText(noteId, content) {
+    let newNotes = R.clone(this.state.app.notes)
+    let changedNote = R.find(R.propEq("id", noteId), newNotes)
+    changedNote.text = content
+    this.setState({
+      app: {
+        notes: newNotes
+      }
+    })
+  }
 
-  updateNoteLinks(lNoteId, newLinks) {
-    // TODO update state with new links from editor component
-    this.setState({ links: this.state.links })
+  createNoteLink(newLink) {
+    let newNotes = R.clone(this.state.app.notes)
+    let changedNote = R.find(R.propEq("id", this.state.ui.currentNoteId), newNotes)
+    changedNote.links = R.append(newLink, changedNote.links)
+    this.setState({
+      app: {
+        notes: newNotes
+      }
+    })
   }
 
   addNote(id, text) {
@@ -254,6 +213,7 @@ class App extends Component {
   }
 
   render() {
+
     const sidebarUI = (
         <div className="sidebar-container">
           <div className="sidebar">
@@ -283,9 +243,6 @@ class App extends Component {
         </div>
       )
 
-    //console.log(getUniqueLinksByCategory(this.state.app.notes))
-    //console.log(getAllFlattenedLinks(this.state.app.notes))
-    //console.log(getLinkOccurrences(this.state.app.notes, "#first"))
     return (
       <div
         className={"app " + this.state.userSettings.theme + "-theme"}
@@ -295,9 +252,10 @@ class App extends Component {
         <Editor
           ref={(self) => this.contentEditable = self}
           note={getNoteById(this.state.ui.currentNoteId, this.state.app.notes)}
-          text={this.state.app.notes.find((note) => note.id == this.state.ui.currentNoteId).text}
-          onLinkUpdate={this.updateNoteLinks.bind(this)}
-          links={getUniqueLinksByCategory(this.state.app.notes)} />
+          links={getAllFlattenedLinks(this.state.app.notes)}
+          onLinkCreate={this.createNoteLink.bind(this)}
+          onContentUpdate={this.setNoteText.bind(this)}
+        />
         <Search
           ref={(self) => this.search = self}
           onClose={(ev) => this.contentEditable.editor.focus()} />
@@ -318,8 +276,6 @@ const getLinksInNote = (nId, notes) => R.prop("links", getNoteById(nId, notes))
 const getTextForChar = key => R.find(R.propEq("char")(key))(allowedLinks).text
 
 const getUniqueLinksByCategory = notes => {
-  const linkText = link => R.concat(link.char, link.value)
-  const linkEq = (link1, link2) => R.equals(linkText(link1), linkText(link2))
   const uniqObj = R.compose(
     R.groupBy(R.prop("char")),
     R.uniqWith(linkEq),
@@ -336,13 +292,17 @@ const linkText = link => R.concat(link.char, link.value)
 
 const linkEq = (link1, link2) => R.equals(linkText(link1), linkText(link2))
 
+const linkExists = (link, linkArr) => R.find(R.curry(linkEq)(link))(linkArr)
+
 const getAllFlattenedLinks = (notes) => {
   const linkNotes = note => {
-    const notePosition = pos => { return { position: Object.assign({}, pos, { noteId: note.id }) } }
+    const notePosition = pos => {
+      return { position: Object.assign({}, pos, { noteId: note.id }) }
+    }
     return note.links.map(link => Object.assign({}, link, notePosition(link.position)))
   }
   const linkOccurences = (acc, cur) => {
-    const existingLink = R.find(R.curry(linkEq)(cur))(acc)
+    const existingLink = linkExists(cur, acc)
     if (!existingLink) {
       const newObj = { char: cur.char, value: cur.value, occurences: [].concat(cur.position) }
       return acc.concat(newObj)

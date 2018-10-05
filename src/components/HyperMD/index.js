@@ -16,20 +16,17 @@ class HyperMD extends Component {
 
   constructor(props) {
     super(props)
-    this.state = {
-      text: ""
-    }
   }
 
   componentDidMount() {
     this.editor = hm.fromTextArea(this.textArea, this.props.opts)
     window.codeEditor = this.editor //for testing
+    this.setHintData(this.props.hintData)
     this.editor.on('change', (inst, obj) => {
-      console.log(obj)
-      if (!(obj.origin === "+input" || obj.origin === "complete")) return
-      const content = this.editor.getValue()
-      // this.setState({ text: content })
-      this.props.onChange(content)
+      //if (!(obj.origin === "+input" || obj.origin === "complete")) return
+      // dont handle change if setValue
+      if (obj.origin == "setValue") return
+      this.props.onChange(obj, this.editor)
     })
 
     this.editor.on("inputRead", (cm, change) => {
@@ -37,6 +34,18 @@ class HyperMD extends Component {
       this.editor.showHint()
       // }
     })
+  }
+
+  componentWillReceiveProps(newProps) {
+    if (!this.editor) return
+    this.setHintData(this.props.hintData)
+    if (this.props.id != newProps.id) {
+      this.editor.getDoc().setValue(newProps.text)
+    }
+  }
+
+  setHintData(data) {
+    this.editor.setOption("hintOptions", { "hint": createHintFunc(data) })
   }
 
   render() {
@@ -50,20 +59,17 @@ class HyperMD extends Component {
   }
 }
 
-function createHintFunc(data) {
-  return function (ref, options) {
+const createHintFunc = dataList => {
+  return (ref, options) => {
     const cursor = ref.getCursor(),
       line = ref.getLine(cursor.line),
       start = cursor.ch - 1,
       end = cursor.ch,
-      delimiter = line.slice(start, cursor.ch).toLowerCase(),
-      dataList = data
-        .filter((item) => item.delimiter == delimiter)
-        .map((item) => delimiter + item.value)
+      delimiter = line.slice(start, cursor.ch).toLowerCase()
     return {
-      list: dataList,
-      from: cm.Pos(cursor.line, start),
-      to: cm.Pos(cursor.line, end)
+      list: dataList.filter(key => key[0] == delimiter),
+      from: CodeMirror.Pos(cursor.line, start),
+      to: CodeMirror.Pos(cursor.line, end)
     }
   }
 }
