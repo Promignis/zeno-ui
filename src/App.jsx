@@ -36,14 +36,16 @@ class App extends Component {
      * Note :: {
      *   id :: String,
      *   text :: String,
-     *   title, lastModified,
+     *   title :: String,
+     *   lastModified :: Time,
      *   lastCursorPosition :: Position ,
      *   links :: [ Link ]
      * }
      * Link :: {
      *   char :: String,
      *   value :: String,
-     *   position :: Position
+     *   position :: Position,
+     *   created :: Time
      * }
      * Position :: {
      *   row :: Int,
@@ -206,8 +208,8 @@ class App extends Component {
         className={"sidebar-note-list-item " + (this.state.ui.currentNoteId == note.id ? "selected" : "")}
         onClick={this.handleNoteChange.bind(this, note.id)}
       >
-        <p className="sidebar-note-list-item-header">{note.id}</p>
-        <p className="sidebar-note-list-item-text">{note.text}</p>
+        <p className="sidebar-note-list-item-header">{getLine(0, note.text)}</p>
+        <p className="sidebar-note-list-item-text">{getLine(1, note.text)}</p>
       </li>
     )
   }
@@ -323,6 +325,26 @@ const getLinkOccurrences = (notes, lKey) => {
   const links = getAllFlattenedLinks(notes)
   const linkFound = links.find(link => (link.char + link.value) == lKey)
   return linkFound ? linkFound.occurences : []
+}
+
+/*
+* Editor helpers
+*/
+const getLine = (row, content) => {
+  return R.compose(
+    R.curry(arrIndex)(row),
+    R.split("\n")
+  )(content)
+}
+
+const arrIndex = (idx, arr) => arr[idx]
+const strCharAt = (idx, str) => str.charAt(idx)
+
+const getCharAtPos = (pos, content) => {
+  return R.compose(
+    R.curry(strCharAt)(pos.column),
+    R.curry(getLine)(pos.row)
+  )(content)
 }
 
 

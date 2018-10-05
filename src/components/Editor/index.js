@@ -157,12 +157,4 @@ const getCharAtPos = (pos, content) => {
   )(content)
 }
 
-
-
-const getTextIn = (posFrom, posTo, content) => {
-  return R.compose(
-
-  )(content)
-}
-
 export default Editor
