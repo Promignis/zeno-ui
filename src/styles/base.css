@@ -1,59 +1,123 @@
 html, body {
-    height: 100%;
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    background: #FAFAFA;
-    font-family: 'Helvetica Neue', arial, sans-serif;
-    font-weight: 400;
-    color: #444;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  background: #FAFAFA;
+  font-family: 'Helvetica Neue', arial, sans-serif;
+  font-weight: 400;
+  color: #444;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 /* TODO Clean this up */
 div.CodeMirror {
-    height: 100%;
-    padding: 40px 60px;
+  height: 100%;
+  padding: 40px 60px;
 }
 
 .CodeMirror pre {
-    line-height: 1.6em;
+  line-height: 1.6em;
 }
 
 .CodeMirror-gutters {
-    display: none;
+  display: none;
 }
 
 
-/* Base app styles */
-/* Move this to different files eventually */
-.app {
+/*
+ * Base app styles
+ * Move this to different files eventually
+ */
+  .app {
     height: 100%;
     padding: 0;
     display: flex;
-}
+  }
 
-.sidebar-container {
-    height: 100%;
-    display: flex;
-}
-
-.sidebar {
-    width: 150px;
-    background-color: aqua;
-    height: 100%;
-}
-
-.links {
-    background-color: aquamarine;
-}
-
-.editable {
+  .editable {
     height: 100%;
     flex-grow: 1;
-}
+  }
+  /*
+   * Sidebar styles
+   */
+  .sidebar-container {
+    height: 100%;
+    display: flex;
+  }
+
+  .sidebar {
+    font-size: 10pt;
+    font-weight: 600;
+    height: 100%;
+    display: flex;
+    background: #121E26;
+    color: #F2FAFF;
+  }
+
+  .sidebar-column {
+    padding-top: 30px;
+  }
+
+  .sidebar-column.sidebar-link {
+    border-right: 1px solid #1D323D;
+    width: 150px;
+  }
+
+  .sidebar-column.sidebar-note {
+    width: 300px;
+  }
+
+  .sidebar-column .sidebar-no-filter {
+    padding-left: 15px;
+  }
+
+  .sidebar.instances {
+    width: 250px;
+    background: #121E26;
+    color: #F2FAFF;
+    border-right: 1px solid #1D323D;
+  }
+
+  .sidebar ul {
+    list-style-type: none;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sidebar-link-category {
+    padding-top: 10px;
+  }
+
+  .sidebar-link-category-text {
+    font-weight: 300;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    padding-left: 15px;
+  }
+
+  .sidebar-link-category-list-item {
+    width: 100%;
+    padding: 7px 0 7px 15px;
+    cursor: pointer;
+    transition: background 150ms ease-out;
+  }
+
+  .app.dark-theme .sidebar-link-category-list-item.selected,
+  .app.dark-theme .sidebar-note-list-item.selected {
+    background: #185675;
+  }
+
+  .sidebar-note-list-item {
+    padding: 7px 15px;
+    cursor: pointer;
+    transition: background 150ms ease-out;
+  }
