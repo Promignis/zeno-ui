@@ -141,12 +141,13 @@ div.CodeMirror {
   cursor: pointer;
   transition: background 150ms ease-out;
 }
-
+.app.dark-theme .sidebar-no-filter.selected,
 .app.dark-theme .sidebar-link-category-list-item.selected,
 .app.dark-theme .sidebar-note-list-item.selected {
   background: #185675;
 }
 
+.sidebar-no-filter,
 .sidebar-note-list-item {
   padding: 7px 15px;
   cursor: pointer;

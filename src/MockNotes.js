@@ -56,8 +56,8 @@ export default [
     ]
   },
   {
-    id: "nt2",
-    text: "this is another test note\n# first",
+    id: "nt3",
+    text: "One more test note\n# first",
     title: "",
     lastModified: Date.parse("01 Jan 2001 00:00:01 GMT"),
     lastCursorPosition: {

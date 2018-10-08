@@ -164,12 +164,13 @@ class App extends Component {
   }
 
   handleLinkChange(id) {
+    const currentNoteId = id ? getLinkOccurrences(this.state.app.notes, id)[0].noteId : this.state.app.notes[0].id
     this.setState({
       ui: Object.assign({},
         this.state.ui,
         {
           currentLinkId: id,
-          currentNoteId: getLinkOccurrences(this.state.app.notes, id)[0].noteId
+          currentNoteId: currentNoteId
         })
     })
   }
@@ -202,7 +203,8 @@ class App extends Component {
   }
 
   renderSidebarNote (linkOccurence) {
-    const note = getNoteById(linkOccurence.noteId, this.state.app.notes)
+    const id = linkOccurence.noteId ? linkOccurence.noteId : linkOccurence.id
+    const note = getNoteById(id, this.state.app.notes)
     return (
       <li
         className={"sidebar-note-list-item " + (this.state.ui.currentNoteId == note.id ? "selected" : "")}
@@ -216,11 +218,13 @@ class App extends Component {
 
   render() {
 
+    const noFilterClass = !this.state.ui.currentLinkId ? "selected" : ""
+
     const sidebarUI = (
         <div className="sidebar-container">
           <div className="sidebar">
             <div className="sidebar-column sidebar-link">
-              <h2 className="sidebar-no-filter">All</h2>
+              <h2 className={"sidebar-no-filter " + noFilterClass} onClick={this.handleLinkChange.bind(this, null)}>All</h2>
               <ul className="sidebar-link-list">
                 {
                   R.compose(
@@ -322,6 +326,7 @@ const getAllFlattenedLinks = (notes) => {
 }
 
 const getLinkOccurrences = (notes, lKey) => {
+  if (!lKey) return notes
   const links = getAllFlattenedLinks(notes)
   const linkFound = links.find(link => (link.char + link.value) == lKey)
   return linkFound ? linkFound.occurences : []
