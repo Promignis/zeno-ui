@@ -123,17 +123,63 @@ class Editor extends Component {
 
   render() {
     return (
-      <HyperMD
-        opts={codeMirrorOpts}
-        id={this.props.note.id}
-        text={this.state.content}
-        hintData={R.map(linkText ,this.props.links)}
-        onChange={this.handleChange.bind(this)} />
+      <div class="editable">
+        <button onclick={this.props.toggleSidebarVisibility}>Aa</button>
+        <HyperMD
+          opts={codeMirrorOpts}
+          id={this.props.note.id}
+          text={this.state.content}
+          hintFunc={createHintFunc(R.map(linkText ,this.props.links))}
+          onChange={this.handleChange.bind(this)} />
+      </div>
     )
   }
 }
 
+const createHintFunc = dataList => {
+  return (ref, callback, options) => {
+    const cursor = ref.getCursor(),
+      line = ref.getLine(cursor.line),
+      start = floor(cursor.ch, indicesOf(" ", line)),
+      end = cursor.ch
+    const positionFrom = { line: cursor.line, ch: start }
+    const positionTo = { line: cursor.line, ch: end }
+      //knack fuzzy
+    const typed = ref.getRange(positionFrom, positionTo)
+    const delim = typed.charAt(0)
+    const filtered = R.filter(word => word.charAt(0) == delim)(dataList)
+    //const maxDist = R.compose(
+      //R.apply(Math.max),
+      //R.map(str => str.length)
+    //)(filtered)
+    //console.log("MAX", maxDist)
+    _runtime.fuzzyMatch(filtered, typed, 6, results => {
+      results = JSON.parse(results)
+      const finalResults = R.map(R.prop("DictStr"), results)
+      callback({
+        list: finalResults,
+        from: positionFrom,
+        to: positionTo
+      })
+    })
+  }
+}
+
 // TODO: move common transformers to utils file
+
+const floor = (key, arr) => {
+  const getVal = (acc, curr) => (Math.abs(curr - key) < Math.abs(acc - key) ? curr : acc)
+  return R.reduce(getVal, arr[0])(arr)
+}
+
+const indicesOf = (char, str) => {
+  const indices = (acc, curr, idx) => curr == char ? acc.concat(idx) : acc
+  return R.compose(
+    R.reduce(indices, [-1]),
+    R.split('')
+  )(str)
+}
+
 const linkText = link => R.concat(link.char, link.value)
 
 const linkEq = (link1, link2) => R.equals(linkText(link1), linkText(link2))

@@ -1,8 +1,6 @@
 import { h, Component } from 'preact'
 import Editor from 'Components/Editor'
 import Search from 'Components/Search'
-import mockNotes from './MockNotes'
-import { default as Config } from '../app.config'
 import "./styles/base.css"
 
 const R = require('ramda')
@@ -68,26 +66,25 @@ class App extends Component {
      * State :: {
      *   app :: AppState,
      *   ui :: UIState,
-     *   userSettings :: Settings
+     *   config :: Settings
      * }
      */
 
-    // set mock data for testing
-    setStoreItem("userSettings", { theme: "dark" })
-    setStoreItem("appState", { notes: mockNotes })
+    const defaultUIState = {
+      currentNoteId: "nt1",
+      currentLinkId: "#first",
+      firstKey: null,
+      sidebar: {
+        visible: true
+      }
+    }
 
     this.state = {
-      app: getStoreItem("appState"),
-      ui : {
-        currentNoteId: "nt1",
-        currentLinkId: "#first",
-        firstKey: null,
-        sidebar: {
-          visible: true
-        }
-      },
-      userSettings: getStoreItem("userSettings")
+      app: Object.assign({}, props.app),
+      ui: defaultUIState,
+      config: Object.assign({}, props.config.user)
     }
+
   }
 
   handleKeyDown(event) {
@@ -105,6 +102,13 @@ class App extends Component {
   handleKeyUp(event) {
     if (event.which !== KEYCODE_CTRL) return
     this.state.firstKey = null
+  }
+
+  toggleSidebarVisibility() {
+    const newSidebar = Object.assign({}, this.state.ui.sidebar, { visible: !this.state.ui.sidebar.visible })
+    this.setState({
+      ui: Object.assign({}, this.state.ui, { sidebar: newSidebar })
+    })
   }
 
   getNoteLinks(lNoteId) {
@@ -251,16 +255,18 @@ class App extends Component {
 
     return (
       <div
-        className={"app " + this.state.userSettings.theme + "-theme"}
+        className={"app " + this.state.config.theme + "-theme"}
         onKeyDown={this.handleKeyDown.bind(this)}
         onKeyUp={this.handleKeyUp.bind(this)} >
-        {sidebarUI}
+        {this.state.ui.sidebar.visible ? sidebarUI : null}
         <Editor
           ref={(self) => this.contentEditable = self}
           note={getNoteById(this.state.ui.currentNoteId, this.state.app.notes)}
           links={getAllFlattenedLinks(this.state.app.notes)}
           onLinkCreate={this.createNoteLink.bind(this)}
           onContentUpdate={this.setNoteText.bind(this)}
+          toggleSidebarVisibility={this.toggleSidebarVisibility.bind(this)}
+          env={this.props.config.app.target}
         />
         <Search
           ref={(self) => this.search = self}
@@ -350,22 +356,6 @@ const getCharAtPos = (pos, content) => {
     R.curry(strCharAt)(pos.column),
     R.curry(getLine)(pos.row)
   )(content)
-}
-
-
-/*
- * general helpers
- */
-const getStoreItem = key => {
-  if (Config.target == "browser") return JSON.parse(localStorage.getItem(key))
-  // add knack storage api
-  if (Config.target == "knack") return {}
-}
-
-const setStoreItem = (key, val) => {
-  if (Config.target == "browser") return localStorage.setItem(key, JSON.stringify(val)) || true
-  // add knack storage api
-  if (Config.target == "knack") return {}
 }
 
 export default App

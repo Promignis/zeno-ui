@@ -5,7 +5,8 @@
     background: #FCF3E1;
 }
 
-.editable .cm-s-hypermd-light.cm-s-dark {
+.app.dark-theme .editable ,
+.app.dark-theme .editable .cm-s-hypermd-light.cm-s-dark {
     background: #203745;
     color: #F2FAFF;
 }
