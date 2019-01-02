@@ -1,5 +1,5 @@
 const appConfig = {
-    target: "knack" //"browser" or "knack" or "knack-test"
+  target: "knack-test" //"browser" or "knack" or "knack-test"
 }
 
 export default appConfig

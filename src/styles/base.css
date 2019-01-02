@@ -34,6 +34,10 @@ div.CodeMirror {
   display: none;
 }
 
+.CodeMirror-gutter-wrapper {
+  display: none;
+}
+
 .CodeMirror-scroll {
   overflow-x: hidden !important;
   overflow-y: scroll !important;

@@ -137,7 +137,7 @@ class Editor extends Component {
 }
 
 const createHintFunc = dataList => {
-  return (ref, callback, options) => {
+  return async (ref, callback, options) => {
     const cursor = ref.getCursor(),
       line = ref.getLine(cursor.line),
       start = floor(cursor.ch, indicesOf(" ", line)),
@@ -153,14 +153,12 @@ const createHintFunc = dataList => {
       //R.map(str => str.length)
     //)(filtered)
     //console.log("MAX", maxDist)
-    _runtime.fuzzyMatch(filtered, typed, 6, results => {
-      results = JSON.parse(results)
-      const finalResults = R.map(R.prop("DictStr"), results)
-      callback({
-        list: finalResults,
-        from: positionFrom,
-        to: positionTo
-      })
+    const results = JSON.parse(await _runtime.fuzzyMatch(filtered, typed, 6))
+    const finalResults = R.map(R.prop("DictStr"), results)
+    callback({
+      list: finalResults,
+      from: positionFrom,
+      to: positionTo
     })
   }
 }

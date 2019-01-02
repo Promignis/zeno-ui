@@ -3,7 +3,7 @@ const webpack = require('webpack')
 
 const config = {
     devtool: "source-map",
-    entry: "./entry.js",
+    entry: ['babel-polyfill', "./entry.js"],
     output: {
         path: path.resolve(__dirname, "dist"),
         filename: "bundle.js"
@@ -49,7 +49,7 @@ const config = {
                     options: {
                         presets: [ "env" ],
                         plugins: [
-                            ['transform-react-jsx', { pragma: 'h' }]
+                            ['transform-react-jsx', { pragma: 'h' }, '@babel/plugin-transform-async-to-generator']
                         ]
                     }
                 }

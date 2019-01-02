@@ -7,12 +7,11 @@ import 'preact/devtools'
 
 // this holds our rendered root element so we can re-render in response to HMR updates.
 let root;
-
 // If this is webpack-dev-server, set up HMR :)
 if (module.hot) module.hot.accept('./src/app', init);
 
 // Making our app's initialization a function means it's repeatable.
-const init = () => {
+const init = async () => {
 	// HMR requires that this be a require()
 	let App = require('./src/app').default;
 
@@ -22,7 +21,7 @@ const init = () => {
       getStoreItemAsync("appState", resolve))
     var pUserSettings = new Promise((resolve, reject) =>
       getStoreItemAsync("userSettings", resolve))
-    Promise.all([pAppState, pUserSettings]).then(values => {
+      let values = await Promise.all([pAppState, pUserSettings])
       const props = {
         app: values[0],
         config: {
@@ -31,7 +30,6 @@ const init = () => {
         }
       }
       root = render(<App {...props} />, document.body, root);
-    })
   } else {
     // sync getStoreItem api
     const props = {
@@ -87,9 +85,10 @@ const setStoreItem = (key, val) => {
   if (Config.target == "knack") return _runtime.setToFile(key, JSON.stringify(val)) || true
 }
 
+(async () => {
+  init();
+})()
 
 // set mock data for testing
 setStoreItem("userSettings", { theme: "dark" })
 setStoreItem("appState", { notes: mockNotes })
-
-init();
