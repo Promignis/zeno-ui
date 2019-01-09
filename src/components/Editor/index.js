@@ -1,5 +1,6 @@
 import { h, Component } from 'preact'
 import HyperMD from 'Components/HyperMD'
+import { fuzzyMatch } from '../../KnackInterface'
 const R = require('ramda')
 
 // characters eligible for autocomplete
@@ -153,7 +154,7 @@ const createHintFunc = dataList => {
       //R.map(str => str.length)
     //)(filtered)
     //console.log("MAX", maxDist)
-    _runtime.fuzzyMatch(filtered, typed, 6, results => {
+    fuzzyMatch(filtered, typed, 6, results => {
       results = JSON.parse(results)
       const finalResults = R.map(R.prop("DictStr"), results)
       callback({

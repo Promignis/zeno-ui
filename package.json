@@ -7,6 +7,8 @@
     "dev-server": "webpack-dev-server --mode development --config webpack.config.js --progress --colors",
     "dev": "webpack --watch --mode development --config webpack.config.js --output dist/zeno-bundle.js --progress --colors",
     "compile": "webpack --mode production --config webpack.config.js --progress --colors",
+    "zeno": "webpack --watch --mode development --config webpack.config.js --progress --colors --env.ENV=knack",
+    "browser": "webpack-dev-server --mode development --config webpack.config.js --progress --colors",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
