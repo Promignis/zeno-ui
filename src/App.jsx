@@ -84,7 +84,6 @@ class App extends Component {
       ui: defaultUIState,
       config: Object.assign({}, props.config.user)
     }
-
   }
 
   handleKeyDown(event) {
@@ -266,7 +265,6 @@ class App extends Component {
           onLinkCreate={this.createNoteLink.bind(this)}
           onContentUpdate={this.setNoteText.bind(this)}
           toggleSidebarVisibility={this.toggleSidebarVisibility.bind(this)}
-          env={this.props.config.app.target}
         />
         <Search
           ref={(self) => this.search = self}
